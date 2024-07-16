@@ -12,4 +12,4 @@ jobs:
       - uses: actions/setup-go@v5
        
       - name: Test
-        run: go test -run=^# -coverprofile=coverage.txt -covermode=atomic ./...
+        run: go test -timeout 300s -run ^TestUserMysqlRepo repos/repositories
