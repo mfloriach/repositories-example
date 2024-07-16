@@ -15,4 +15,4 @@ jobs:
         run: go mod download
        
       - name: Test
-        run: go test -timeout 300s -run ^TestUserMysqlRepo repos/repositories
+        run: go test -timeout 30s -run ^TestUserMysqlRepo repos/repositories
