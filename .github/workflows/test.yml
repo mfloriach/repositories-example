@@ -10,6 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
+
+      - name: Install
+        run: go mod download
        
       - name: Test
         run: go test -timeout 300s -run ^TestUserMysqlRepo repos/repositories
