@@ -12,7 +12,13 @@ jobs:
       - uses: actions/setup-go@v5
 
       - name: Install
-        run: go mod download
+        run: |
+          go mod download
+          go install github.com/ctrf-io/go-ctrf-json-reporter/cmd/go-ctrf-json-reporter@latest
        
       - name: Test
-        run: go test -run ^TestUser repos/repositories
+        run: go test -json -run ^TestUser repos/repositories | go-ctrf-json-reporter -output ctrf-report.json
+
+      - name: Publish CTRF Test Summary Results
+        run: npx github-actions-ctrf ctrf-report.json
+        if: always()
