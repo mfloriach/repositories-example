@@ -89,8 +89,6 @@ func TestUserMongoRepoGetByID(t *testing.T) {
 }
 
 func TestUserMongoRepoGetAll(t *testing.T) {
-	t.Skip()
-
 	ctx := context.Background()
 
 	mongodbContainer, err := mongodb.Run(ctx, "mongo:7.0.5")
@@ -122,17 +120,6 @@ func TestUserMongoRepoGetAll(t *testing.T) {
 
 	r := repositories.NewUserRepoMongo(db)
 	collection := db.Collection("users")
-
-	for i := 0; i < 7; i++ {
-		if _, err := collection.InsertOne(ctx, interfaces.User{
-			ID:        uint(i),
-			Name:      "asdsa",
-			Age:       10 + uint8(i),
-			CreatedAt: time.Date(2024, 4, 10+i, 0, 0, 0, 0, time.Local),
-		}); err != nil {
-			panic(err)
-		}
-	}
 
 	docs := []interface{}{
 		interfaces.User{

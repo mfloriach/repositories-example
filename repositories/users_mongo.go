@@ -2,12 +2,12 @@ package repositories
 
 import (
 	"context"
+	"time"
 
 	"repos/interfaces"
 	"repos/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -40,34 +40,48 @@ func (r userRepoMongo) GetAll(ctx context.Context, filters interfaces.Filters, o
 		limit = int64(filters.Limit)
 	}
 
-	// var offset int64 = 1
-	// if filters.Offset != 0 {
-	// 	offset = int64(filters.Offset)
-	// }
+	var offset int64 = 0
+	if filters.Offset != 0 {
+		offset = int64(filters.Offset)
+	}
+
+	var sort = "createdat"
+	if filters.OrderBy != "" {
+		sort = string(filters.OrderBy)
+	}
 
 	options := options.FindOptions{
-		// Skip:  &offset,
+		Skip:  &offset,
 		Limit: &limit,
-		Sort:  bson.D{{"createdat", -1}},
+		Sort:  bson.D{{sort, -1}},
 	}
 
-	var ageGte primitive.D = bson.D{}
+	f := bson.A{}
+
+	now := time.Date(2024, 4, 17, 0, 0, 0, 0, time.Local)
+
+	var createdAtGte time.Time = now.AddDate(0, 0, -30)
+	if !filters.CreatedAtGte.IsZero() {
+		createdAtGte = filters.CreatedAtGte
+	}
+
+	var createdAtLte time.Time = now
+	if !filters.CreatedAtLte.IsZero() {
+		createdAtLte = filters.CreatedAtLte
+	}
+
+	f = append(f, bson.D{{"createdat", bson.D{{"$lte", createdAtLte}}}})
+	f = append(f, bson.D{{"createdat", bson.D{{"$gt", createdAtGte}}}})
+
 	if filters.AgeGte != 0 {
-		ageGte = bson.D{{"age", bson.D{{"$gte", filters.AgeGte}}}}
+		f = append(f, bson.D{{"age", bson.D{{"$gte", filters.AgeGte}}}})
 	}
 
-	var ageLte primitive.D = bson.D{}
 	if filters.AgeLte != 0 {
-		ageLte = bson.D{{"age", bson.D{{"$lte", filters.AgeLte}}}}
+		f = append(f, bson.D{{"age", bson.D{{"$lte", filters.AgeLte}}}})
 	}
 
-	filter := bson.D{
-		{"$and",
-			bson.A{
-				ageGte,
-				ageLte,
-			}},
-	}
+	filter := bson.D{{"$and", f}}
 
 	cursor, err := r.collection.Find(ctx, filter, &options)
 	if err != nil {

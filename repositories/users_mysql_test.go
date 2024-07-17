@@ -280,3 +280,53 @@ func TestUserMysqlRepoDelete(t *testing.T) {
 
 	assert.Empty(t, userDelete, "they should be equal")
 }
+
+func TestUserMysqlRepoUpdate(t *testing.T) {
+	ctx := context.Background()
+
+	mysqlContainer, close, err := NewTestContainerMysql(ctx)
+	if err != nil {
+		t.Fatalf("mounting db container: %v", err)
+	}
+	defer close(ctx)
+
+	db, err := gorm.Open(mysql.Open(mysqlContainer.GetConnection(ctx)), &gorm.Config{
+		QueryFields: true,
+	})
+	if err != nil {
+		t.Fatalf("mounting db: %v", err)
+	}
+
+	r := repositories.NewUserRepoMysql(db)
+
+	u := interfaces.User{
+		Name: "John Doe",
+		Age:  5,
+	}
+
+	if err := r.Create(ctx, &u); err != nil {
+		t.Fatalf("creating user table: %v", err)
+	}
+
+	user, err := r.GetById(ctx, 7)
+	if err != nil {
+		t.Fatalf("creating user table: %v", err)
+	}
+
+	assert.Equal(t, "John Doe", user.Name, "they should be equal")
+
+	val := map[string]interface{}{
+		"name": "new name",
+	}
+
+	if err := r.Update(ctx, &u, val); err != nil {
+		t.Fatalf("creating user table: %v", err)
+	}
+
+	userUpdated, err := r.GetById(ctx, 7)
+	if err != nil {
+		t.Fatalf("creating user table: %v", err)
+	}
+
+	assert.Equal(t, "new name", userUpdated.Name, "they should be equal")
+}
