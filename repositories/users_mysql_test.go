@@ -2,7 +2,6 @@ package repositories_test
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"runtime"
 	"testing"
@@ -83,9 +82,7 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 	}
 	defer close(ctx)
 
-	db, err := gorm.Open(mysql.Open(mysqlContainer.GetConnection(ctx)), &gorm.Config{
-		QueryFields: true,
-	})
+	db, err := gorm.Open(mysql.Open(mysqlContainer.GetConnection(ctx)), &gorm.Config{})
 	if err != nil {
 		t.Fatalf("mounting db: %v", err)
 	}
@@ -129,7 +126,9 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("lte test", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{Lte: time.Date(2024, 4, 13, 0, 0, 0, 0, time.Local)})
+		users, err := r.GetAll(ctx, interfaces.Filters{
+			CreatedAtLte: time.Date(2024, 4, 13, 0, 0, 0, 0, time.Local),
+		})
 		if err != nil {
 			t.Fatalf("creating user table: %v", err)
 		}
@@ -146,15 +145,64 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 		assert.Equal(t, uint(6), users[0].ID, "they should be equal")
 	})
 
-	// t.Run("gte test", func(t *testing.T) {
-	// 	users, err := r.GetAll(ctx, interfaces.Filters{Gte: time.Date(2024, 4, 14, 0, 0, 0, 0, time.Local)})
-	// 	if err != nil {
-	// 		t.Fatalf("creating user table: %v", err)
-	// 	}
+	t.Run("gte test", func(t *testing.T) {
+		users, err := r.GetAll(ctx, interfaces.Filters{
+			CreatedAtGte: time.Date(2024, 4, 14, 0, 0, 0, 0, time.Local),
+		})
+		if err != nil {
+			t.Fatalf("creating user table: %v", err)
+		}
 
-	// 	assert.Equal(t, 2, len(users), "they should be equal")
-	// })
+		assert.Equal(t, 2, len(users), "they should be equal")
+	})
 
+	t.Run("between gte and lte", func(t *testing.T) {
+		users, err := r.GetAll(ctx, interfaces.Filters{
+			CreatedAtGte: time.Date(2024, 4, 13, 0, 0, 0, 0, time.Local),
+			CreatedAtLte: time.Date(2024, 4, 15, 0, 0, 0, 0, time.Local),
+		})
+		if err != nil {
+			t.Fatalf("creating user table: %v", err)
+		}
+
+		assert.Equal(t, 2, len(users), "they should be equal")
+	})
+
+	t.Run("order by age", func(t *testing.T) {
+		users, err := r.GetAll(ctx, interfaces.Filters{
+			OrderBy: interfaces.OrderByAge,
+		})
+		if err != nil {
+			t.Fatalf("creating user table: %v", err)
+		}
+
+		assert.Equal(t, uint8(66), users[0].Age, "they should be equal")
+		assert.Equal(t, uint8(55), users[1].Age, "they should be equal")
+	})
+
+	t.Run("order by name", func(t *testing.T) {
+		users, err := r.GetAll(ctx, interfaces.Filters{
+			OrderBy: interfaces.OrderByName,
+		})
+		if err != nil {
+			t.Fatalf("creating user table: %v", err)
+		}
+
+		assert.Equal(t, "third", users[0].Name, "they should be equal")
+		assert.Equal(t, "six", users[1].Name, "they should be equal")
+	})
+
+	t.Run("age range", func(t *testing.T) {
+		users, err := r.GetAll(ctx, interfaces.Filters{
+			AgeGte: 22,
+			AgeLte: 45,
+		})
+		if err != nil {
+			t.Fatalf("creating user table: %v", err)
+		}
+
+		assert.Equal(t, 4, len(users), "they should be equal")
+	})
 }
 
 func TestUserMysqlRepoCreate(t *testing.T) {
@@ -177,6 +225,7 @@ func TestUserMysqlRepoCreate(t *testing.T) {
 
 	if err := r.Create(ctx, &interfaces.User{
 		Name: "John Doe",
+		Age:  5,
 	}); err != nil {
 		t.Fatalf("creating user table: %v", err)
 	}
@@ -186,6 +235,48 @@ func TestUserMysqlRepoCreate(t *testing.T) {
 		t.Fatalf("creating user table: %v", err)
 	}
 
-	fmt.Println(users[0].ID)
-	fmt.Println(len(users))
+	assert.Equal(t, uint(6), users[0].ID, "they should be equal")
+}
+
+func TestUserMysqlRepoDelete(t *testing.T) {
+	ctx := context.Background()
+
+	mysqlContainer, close, err := NewTestContainerMysql(ctx)
+	if err != nil {
+		t.Fatalf("mounting db container: %v", err)
+	}
+	defer close(ctx)
+
+	db, err := gorm.Open(mysql.Open(mysqlContainer.GetConnection(ctx)), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("mounting db: %v", err)
+	}
+
+	r := repositories.NewUserRepoMysql(db)
+
+	u := &interfaces.User{
+		Name: "John Doe",
+	}
+
+	if err := r.Create(ctx, u); err != nil {
+		t.Fatalf("creating user table: %v", err)
+	}
+
+	user, err := r.GetById(ctx, int64(u.ID))
+	if err != nil {
+		t.Fatalf("creating user table: %v", err)
+	}
+
+	assert.Equal(t, uint(7), user.ID, "they should be equal")
+
+	if err := r.Delete(ctx, int64(u.ID)); err != nil {
+		t.Fatalf("deleting user table: %v", err)
+	}
+
+	userDelete, err := r.GetById(ctx, int64(u.ID))
+	if err != nil {
+		t.Fatalf("creating user table: %v", err)
+	}
+
+	assert.Empty(t, userDelete, "they should be equal")
 }

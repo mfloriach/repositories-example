@@ -7,16 +7,29 @@ import (
 )
 
 type User struct {
-	ID   uint
-	Name string
+	ID        uint
+	Name      string
+	Age       uint8
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
+type OrderBy string
+
+const (
+	OrderByAge       OrderBy = "age"
+	OrderByName      OrderBy = "name"
+	OrderByCreatedAt OrderBy = "created_at"
+)
+
 type Filters struct {
-	Offset  int
-	Limit   int
-	OrderBy string
-	Gte     time.Time
-	Lte     time.Time
+	Offset       int
+	Limit        int
+	OrderBy      OrderBy
+	CreatedAtGte time.Time
+	CreatedAtLte time.Time
+	AgeGte       uint8
+	AgeLte       uint8
 }
 
 type UsersRepo interface {

@@ -15,4 +15,4 @@ jobs:
         run: go mod download
        
       - name: Test
-        run: go test -run ^TestUserMysqlRepo repos/repositories
+        run: go test -run ^TestUser repos/repositories

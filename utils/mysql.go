@@ -30,6 +30,20 @@ func defaultClause() options {
 	}
 }
 
+func WithTx(tx *gorm.DB) Options {
+	return func(c *options) {
+		c.Tx = tx
+	}
+}
+
+func WithLock(c *options) {
+	c.Lock = true
+}
+
+func FromMasterReplica(c *options) {
+	c.FromMaster = true
+}
+
 func ConfigureDB(db *gorm.DB, clauses ...Options) *gorm.DB {
 	q := defaultClause()
 

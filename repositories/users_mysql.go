@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"repos/interfaces"
@@ -26,34 +27,53 @@ func (r userRepoMysql) GetById(ctx context.Context, id int64, opts ...utils.Opti
 
 func (r userRepoMysql) GetAll(ctx context.Context, filters interfaces.Filters, opts ...utils.Options) ([]*interfaces.User, error) {
 	var users []*interfaces.User
-	q := utils.ConfigureDB(r.db, opts...).WithContext(ctx)
-
-	var limit = utils.Limit
-	if filters.Limit != 0 {
-		limit = filters.Limit
-	}
 
 	var offset = 0
 	if filters.Offset != 0 {
 		offset = filters.Offset
 	}
 
-	var gte = time.Date(2024, 4, 17, 0, 0, 0, 0, time.Local).AddDate(0, 0, -30)
-	if !filters.Gte.IsZero() {
-		gte = filters.Gte
+	var limit = utils.Limit
+	if filters.Limit != 0 {
+		limit = filters.Limit
 	}
 
-	var lte = time.Date(2024, 4, 17, 0, 0, 0, 0, time.Local)
-	if !filters.Lte.IsZero() {
-		lte = filters.Lte
+	var orderBy = interfaces.OrderByCreatedAt
+	if filters.OrderBy != "" {
+		orderBy = filters.OrderBy
 	}
 
-	err := q.
-		Where("created_at <= ?", lte).
-		Where("created_at >= ?", gte).
+	now := time.Date(2024, 4, 17, 0, 0, 0, 0, time.Local)
+
+	var createdAtGte time.Time = now.AddDate(0, 0, -30)
+	if !filters.CreatedAtGte.IsZero() {
+		createdAtGte = filters.CreatedAtGte
+	}
+
+	var createdAtLte time.Time = now
+	if !filters.CreatedAtLte.IsZero() {
+		createdAtLte = filters.CreatedAtLte
+	}
+
+	stmp := utils.
+		ConfigureDB(r.db, opts...).
+		WithContext(ctx).
+		Debug().
+		Where("created_at <= ?", createdAtLte).
+		Where("created_at >= ?", createdAtGte)
+
+	if filters.AgeGte != 0 {
+		stmp = stmp.Where("age >= ?", filters.AgeGte)
+	}
+
+	if filters.AgeLte != 0 {
+		stmp = stmp.Where("age <= ?", filters.AgeLte)
+	}
+
+	err := stmp.
 		Limit(limit).
 		Offset(offset).
-		Order("created_at DESC").
+		Order(fmt.Sprintf("%v DESC", orderBy)).
 		Find(&users).
 		Error
 
