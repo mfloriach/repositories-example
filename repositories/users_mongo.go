@@ -33,7 +33,7 @@ func (r userRepoMongo) GetById(ctx context.Context, id int64, opts ...utils.Opti
 	return user, nil
 }
 
-func (r userRepoMongo) GetAll(ctx context.Context, filters interfaces.Filters, opts ...utils.Options) ([]*interfaces.User, error) {
+func (r userRepoMongo) GetAll(ctx context.Context, filters interfaces.Filters, opts ...utils.Options) ([]*interfaces.User, int64, error) {
 
 	var limit int64 = utils.Limit
 	if filters.Limit != 0 {
@@ -86,18 +86,18 @@ func (r userRepoMongo) GetAll(ctx context.Context, filters interfaces.Filters, o
 	cursor, err := r.collection.Find(ctx, filter, &options)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, nil
+			return nil, 0, nil
 		}
 
-		return nil, err
+		return nil, 0, err
 	}
 
 	var users []*interfaces.User
 	if err = cursor.All(ctx, &users); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return users, nil
+	return users, 0, nil
 }
 
 func (r userRepoMongo) Create(ctx context.Context, user *interfaces.User, opts ...utils.Options) error {

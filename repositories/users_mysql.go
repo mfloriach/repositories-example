@@ -25,7 +25,7 @@ func (r userRepoMysql) GetById(ctx context.Context, id int64, opts ...utils.Opti
 	return user, err
 }
 
-func (r userRepoMysql) GetAll(ctx context.Context, filters interfaces.Filters, opts ...utils.Options) ([]*interfaces.User, error) {
+func (r userRepoMysql) GetAll(ctx context.Context, filters interfaces.Filters, opts ...utils.Options) ([]*interfaces.User, int64, error) {
 	var users []*interfaces.User
 
 	var offset = 0
@@ -70,6 +70,11 @@ func (r userRepoMysql) GetAll(ctx context.Context, filters interfaces.Filters, o
 		stmp = stmp.Where("age <= ?", filters.AgeLte)
 	}
 
+	var total int64
+	if err := stmp.Count(&total).Error; err != nil {
+		return users, 0, err
+	}
+
 	err := stmp.
 		Limit(limit).
 		Offset(offset).
@@ -77,7 +82,7 @@ func (r userRepoMysql) GetAll(ctx context.Context, filters interfaces.Filters, o
 		Find(&users).
 		Error
 
-	return users, err
+	return users, total, err
 }
 
 func (r userRepoMysql) Create(ctx context.Context, user *interfaces.User, opts ...utils.Options) error {

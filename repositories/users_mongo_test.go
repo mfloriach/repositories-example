@@ -164,7 +164,7 @@ func TestUserMongoRepoGetAll(t *testing.T) {
 	}
 
 	t.Run("check limit to 2", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{Offset: 0, Limit: 2})
+		users, _, err := r.GetAll(ctx, interfaces.Filters{Offset: 0, Limit: 2})
 		if err != nil {
 			t.Fatalf("creating user table: %v", err)
 		}
@@ -173,7 +173,7 @@ func TestUserMongoRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("check limit to 6", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{Offset: 0, Limit: 6})
+		users, _, err := r.GetAll(ctx, interfaces.Filters{Offset: 0, Limit: 6})
 		if err != nil {
 			t.Fatalf("creating user table: %v", err)
 		}
@@ -182,7 +182,7 @@ func TestUserMongoRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("offset beging", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{Offset: 0, Limit: 6})
+		users, _, err := r.GetAll(ctx, interfaces.Filters{Offset: 0, Limit: 6})
 		if err != nil {
 			t.Fatalf("creating user table: %v", err)
 		}
@@ -191,7 +191,7 @@ func TestUserMongoRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("offset move", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{Offset: 1, Limit: 6})
+		users, _, err := r.GetAll(ctx, interfaces.Filters{Offset: 1, Limit: 6})
 		if err != nil {
 			t.Fatalf("creating user table: %v", err)
 		}
@@ -200,7 +200,7 @@ func TestUserMongoRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("lte test", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{
+		users, _, err := r.GetAll(ctx, interfaces.Filters{
 			CreatedAtLte: time.Date(2024, 4, 13, 0, 0, 0, 0, time.Local),
 		})
 		if err != nil {
@@ -211,7 +211,7 @@ func TestUserMongoRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("lte default", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{})
+		users, _, err := r.GetAll(ctx, interfaces.Filters{})
 		if err != nil {
 			t.Fatalf("creating user table: %v", err)
 		}
@@ -220,7 +220,7 @@ func TestUserMongoRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("gte test", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{
+		users, _, err := r.GetAll(ctx, interfaces.Filters{
 			CreatedAtGte: time.Date(2024, 4, 14, 0, 0, 0, 0, time.Local),
 		})
 		if err != nil {
@@ -231,7 +231,7 @@ func TestUserMongoRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("between gte and lte", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{
+		users, _, err := r.GetAll(ctx, interfaces.Filters{
 			CreatedAtGte: time.Date(2024, 4, 13, 0, 0, 0, 0, time.Local),
 			CreatedAtLte: time.Date(2024, 4, 15, 0, 0, 0, 0, time.Local),
 		})
@@ -243,7 +243,7 @@ func TestUserMongoRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("order by age", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{
+		users, _, err := r.GetAll(ctx, interfaces.Filters{
 			OrderBy: interfaces.OrderByAge,
 		})
 		if err != nil {
@@ -255,7 +255,7 @@ func TestUserMongoRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("order by name", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{
+		users, _, err := r.GetAll(ctx, interfaces.Filters{
 			OrderBy: interfaces.OrderByName,
 		})
 		if err != nil {
@@ -267,7 +267,7 @@ func TestUserMongoRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("age range", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{
+		users, _, err := r.GetAll(ctx, interfaces.Filters{
 			AgeGte: 22,
 			AgeLte: 45,
 		})

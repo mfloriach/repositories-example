@@ -34,7 +34,7 @@ type Filters struct {
 
 type UsersRepo interface {
 	GetById(context.Context, int64, ...utils.Options) (*User, error)
-	GetAll(context.Context, Filters, ...utils.Options) ([]*User, error)
+	GetAll(context.Context, Filters, ...utils.Options) ([]*User, int64, error)
 	Create(context.Context, *User, ...utils.Options) error
 	Update(context.Context, *User, map[string]interface{}, ...utils.Options) error
 	Delete(context.Context, int64, ...utils.Options) error

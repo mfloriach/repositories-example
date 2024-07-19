@@ -90,25 +90,29 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 	r := repositories.NewUserRepoMysql(db)
 
 	t.Run("check limit to 2", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{Offset: 0, Limit: 2})
+		users, total, err := r.GetAll(ctx, interfaces.Filters{Offset: 0, Limit: 2})
 		if err != nil {
 			t.Fatalf("creating user table: %v", err)
 		}
 
 		assert.Equal(t, 2, len(users), "they should be equal")
+		assert.Equal(t, 6, total, "they should be equal")
+		assert.Nil(t, err)
 	})
 
 	t.Run("check limit to 6", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{Offset: 0, Limit: 6})
+		users, total, err := r.GetAll(ctx, interfaces.Filters{Offset: 0, Limit: 6})
 		if err != nil {
 			t.Fatalf("creating user table: %v", err)
 		}
 
 		assert.Equal(t, 6, len(users), "they should be equal")
+		assert.Equal(t, 6, total, "they should be equal")
+		assert.Nil(t, err)
 	})
 
 	t.Run("offset beging", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{Offset: 0, Limit: 6})
+		users, _, err := r.GetAll(ctx, interfaces.Filters{Offset: 0, Limit: 6})
 		if err != nil {
 			t.Fatalf("creating user table: %v", err)
 		}
@@ -117,7 +121,7 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("offset move", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{Offset: 1, Limit: 6})
+		users, _, err := r.GetAll(ctx, interfaces.Filters{Offset: 1, Limit: 6})
 		if err != nil {
 			t.Fatalf("creating user table: %v", err)
 		}
@@ -126,7 +130,7 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("lte test", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{
+		users, _, err := r.GetAll(ctx, interfaces.Filters{
 			CreatedAtLte: time.Date(2024, 4, 13, 0, 0, 0, 0, time.Local),
 		})
 		if err != nil {
@@ -137,7 +141,7 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("lte default", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{})
+		users, _, err := r.GetAll(ctx, interfaces.Filters{})
 		if err != nil {
 			t.Fatalf("creating user table: %v", err)
 		}
@@ -146,7 +150,7 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("gte test", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{
+		users, _, err := r.GetAll(ctx, interfaces.Filters{
 			CreatedAtGte: time.Date(2024, 4, 14, 0, 0, 0, 0, time.Local),
 		})
 		if err != nil {
@@ -157,7 +161,7 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("between gte and lte", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{
+		users, _, err := r.GetAll(ctx, interfaces.Filters{
 			CreatedAtGte: time.Date(2024, 4, 13, 0, 0, 0, 0, time.Local),
 			CreatedAtLte: time.Date(2024, 4, 15, 0, 0, 0, 0, time.Local),
 		})
@@ -169,7 +173,7 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("order by age", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{
+		users, _, err := r.GetAll(ctx, interfaces.Filters{
 			OrderBy: interfaces.OrderByAge,
 		})
 		if err != nil {
@@ -181,7 +185,7 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("order by name", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{
+		users, _, err := r.GetAll(ctx, interfaces.Filters{
 			OrderBy: interfaces.OrderByName,
 		})
 		if err != nil {
@@ -193,7 +197,7 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 	})
 
 	t.Run("age range", func(t *testing.T) {
-		users, err := r.GetAll(ctx, interfaces.Filters{
+		users, _, err := r.GetAll(ctx, interfaces.Filters{
 			AgeGte: 22,
 			AgeLte: 45,
 		})
@@ -230,7 +234,7 @@ func TestUserMysqlRepoCreate(t *testing.T) {
 		t.Fatalf("creating user table: %v", err)
 	}
 
-	users, err := r.GetAll(ctx, interfaces.Filters{Offset: 0, Limit: 10})
+	users, _, err := r.GetAll(ctx, interfaces.Filters{Offset: 0, Limit: 10})
 	if err != nil {
 		t.Fatalf("creating user table: %v", err)
 	}
