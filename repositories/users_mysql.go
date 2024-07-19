@@ -71,7 +71,7 @@ func (r userRepoMysql) GetAll(ctx context.Context, filters interfaces.Filters, o
 	}
 
 	var total int64
-	if err := stmp.Count(&total).Error; err != nil {
+	if err := stmp.Model(&interfaces.User{}).Count(&total).Error; err != nil {
 		return users, 0, err
 	}
 

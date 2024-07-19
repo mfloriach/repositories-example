@@ -96,8 +96,8 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 		}
 
 		assert.Equal(t, 2, len(users), "they should be equal")
-		assert.Equal(t, 6, total, "they should be equal")
-		assert.Nil(t, err)
+		assert.Equal(t, int64(6), total, "they should be equal")
+		assert.Nil(t, err, "they should be equal")
 	})
 
 	t.Run("check limit to 6", func(t *testing.T) {
@@ -107,30 +107,34 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 		}
 
 		assert.Equal(t, 6, len(users), "they should be equal")
-		assert.Equal(t, 6, total, "they should be equal")
-		assert.Nil(t, err)
+		assert.Equal(t, int64(6), total, "they should be equal")
+		assert.Nil(t, err, "they should be equal")
 	})
 
 	t.Run("offset beging", func(t *testing.T) {
-		users, _, err := r.GetAll(ctx, interfaces.Filters{Offset: 0, Limit: 6})
+		users, total, err := r.GetAll(ctx, interfaces.Filters{Offset: 0, Limit: 6})
 		if err != nil {
 			t.Fatalf("creating user table: %v", err)
 		}
 
 		assert.Equal(t, uint(6), users[0].ID, "they should be equal")
+		assert.Equal(t, int64(6), total, "they should be equal")
+		assert.Nil(t, err, "they should be equal")
 	})
 
 	t.Run("offset move", func(t *testing.T) {
-		users, _, err := r.GetAll(ctx, interfaces.Filters{Offset: 1, Limit: 6})
+		users, total, err := r.GetAll(ctx, interfaces.Filters{Offset: 1, Limit: 6})
 		if err != nil {
 			t.Fatalf("creating user table: %v", err)
 		}
 
 		assert.Equal(t, uint(5), users[0].ID, "they should be equal")
+		assert.Equal(t, int64(6), total, "they should be equal")
+		assert.Nil(t, err, "they should be equal")
 	})
 
 	t.Run("lte test", func(t *testing.T) {
-		users, _, err := r.GetAll(ctx, interfaces.Filters{
+		users, total, err := r.GetAll(ctx, interfaces.Filters{
 			CreatedAtLte: time.Date(2024, 4, 13, 0, 0, 0, 0, time.Local),
 		})
 		if err != nil {
@@ -138,19 +142,23 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 		}
 
 		assert.Equal(t, uint(3), users[0].ID, "they should be equal")
+		assert.Equal(t, int64(3), total, "they should be equal")
+		assert.Nil(t, err, "they should be equal")
 	})
 
 	t.Run("lte default", func(t *testing.T) {
-		users, _, err := r.GetAll(ctx, interfaces.Filters{})
+		users, total, err := r.GetAll(ctx, interfaces.Filters{})
 		if err != nil {
 			t.Fatalf("creating user table: %v", err)
 		}
 
 		assert.Equal(t, uint(6), users[0].ID, "they should be equal")
+		assert.Equal(t, int64(6), total, "they should be equal")
+		assert.Nil(t, err, "they should be equal")
 	})
 
 	t.Run("gte test", func(t *testing.T) {
-		users, _, err := r.GetAll(ctx, interfaces.Filters{
+		users, total, err := r.GetAll(ctx, interfaces.Filters{
 			CreatedAtGte: time.Date(2024, 4, 14, 0, 0, 0, 0, time.Local),
 		})
 		if err != nil {
@@ -158,10 +166,12 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 		}
 
 		assert.Equal(t, 2, len(users), "they should be equal")
+		assert.Equal(t, int64(2), total, "they should be equal")
+		assert.Nil(t, err, "they should be equal")
 	})
 
 	t.Run("between gte and lte", func(t *testing.T) {
-		users, _, err := r.GetAll(ctx, interfaces.Filters{
+		users, total, err := r.GetAll(ctx, interfaces.Filters{
 			CreatedAtGte: time.Date(2024, 4, 13, 0, 0, 0, 0, time.Local),
 			CreatedAtLte: time.Date(2024, 4, 15, 0, 0, 0, 0, time.Local),
 		})
@@ -170,10 +180,12 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 		}
 
 		assert.Equal(t, 2, len(users), "they should be equal")
+		assert.Equal(t, int64(2), total, "they should be equal")
+		assert.Nil(t, err, "they should be equal")
 	})
 
 	t.Run("order by age", func(t *testing.T) {
-		users, _, err := r.GetAll(ctx, interfaces.Filters{
+		users, total, err := r.GetAll(ctx, interfaces.Filters{
 			OrderBy: interfaces.OrderByAge,
 		})
 		if err != nil {
@@ -182,10 +194,12 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 
 		assert.Equal(t, uint8(66), users[0].Age, "they should be equal")
 		assert.Equal(t, uint8(55), users[1].Age, "they should be equal")
+		assert.Equal(t, int64(6), total, "they should be equal")
+		assert.Nil(t, err, "they should be equal")
 	})
 
 	t.Run("order by name", func(t *testing.T) {
-		users, _, err := r.GetAll(ctx, interfaces.Filters{
+		users, total, err := r.GetAll(ctx, interfaces.Filters{
 			OrderBy: interfaces.OrderByName,
 		})
 		if err != nil {
@@ -194,10 +208,12 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 
 		assert.Equal(t, "third", users[0].Name, "they should be equal")
 		assert.Equal(t, "six", users[1].Name, "they should be equal")
+		assert.Equal(t, int64(6), total, "they should be equal")
+		assert.Nil(t, err, "they should be equal")
 	})
 
 	t.Run("age range", func(t *testing.T) {
-		users, _, err := r.GetAll(ctx, interfaces.Filters{
+		users, total, err := r.GetAll(ctx, interfaces.Filters{
 			AgeGte: 22,
 			AgeLte: 45,
 		})
@@ -206,6 +222,8 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 		}
 
 		assert.Equal(t, 4, len(users), "they should be equal")
+		assert.Equal(t, int64(4), total, "they should be equal")
+		assert.Nil(t, err, "they should be equal")
 	})
 }
 
