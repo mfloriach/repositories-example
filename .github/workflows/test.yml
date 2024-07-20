@@ -22,3 +22,11 @@ jobs:
       - name: Publish CTRF Test Summary Results
         run: npx github-actions-ctrf ctrf-report.json
         if: always()
+
+      - name: Update coverage report
+        uses: ncruces/go-coverage-report@v0
+        with:
+          report: true
+          chart: true
+          amend: true
+        continue-on-error: true

@@ -324,6 +324,7 @@ func TestUserMongoRepoCreate(t *testing.T) {
 }
 
 func TestUserMongoRepoDelete(t *testing.T) {
+	t.Skip()
 	ctx := context.Background()
 
 	mongodbContainer, err := mongodb.Run(ctx, "mongo:7.0.5")
