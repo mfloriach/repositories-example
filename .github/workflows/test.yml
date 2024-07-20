@@ -20,7 +20,19 @@ jobs:
         run: |
           go test -coverprofile=./cover.out -covermode=atomic -json -run ^TestUser repos/repositories | go-ctrf-json-reporter -output ctrf-report.json
           go tool cover -html=cover.out -o=cover.html
-          
+
       - name: Publish CTRF Test Summary Results
         run: npx github-actions-ctrf ctrf-report.json
         if: always()
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v2
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: 'cover.html'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
