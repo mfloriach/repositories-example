@@ -123,7 +123,7 @@ func (r userRepoMongo) Update(ctx context.Context, user *interfaces.User, vals m
 }
 
 func (r userRepoMongo) Delete(ctx context.Context, ids []int64, opts ...utils.Options) error {
-	_, err := r.collection.DeleteMany(ctx, bson.D{{"id", ids}})
+	_, err := r.collection.DeleteMany(ctx, bson.M{"id": bson.M{"$in": ids}})
 
 	return err
 }

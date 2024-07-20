@@ -324,7 +324,6 @@ func TestUserMongoRepoCreate(t *testing.T) {
 }
 
 func TestUserMongoRepoDelete(t *testing.T) {
-	t.Skip()
 	ctx := context.Background()
 
 	mongodbContainer, err := mongodb.Run(ctx, "mongo:7.0.5")
@@ -361,16 +360,46 @@ func TestUserMongoRepoDelete(t *testing.T) {
 
 	r := repositories.NewUserRepoMongo(db)
 
-	if err := r.Delete(ctx, []int64{1}); err != nil {
-		t.Fatalf("deleting user table: %v", err)
-	}
+	t.Run("single", func(t *testing.T) {
+		if err := r.Delete(ctx, []int64{1}); err != nil {
+			t.Fatalf("deleting user table: %v", err)
+		}
 
-	userDelete, err := r.GetById(ctx, 1)
-	if err != nil {
-		t.Fatalf("creating user table: %v", err)
-	}
+		userDelete, err := r.GetById(ctx, 1)
+		if err != nil {
+			t.Fatalf("creating user table: %v", err)
+		}
 
-	assert.Empty(t, userDelete, "they should be equal")
+		assert.Empty(t, userDelete, "they should be equal")
+		assert.Nil(t, err)
+	})
+
+	t.Run("multiple", func(t *testing.T) {
+		if err := r.Delete(ctx, []int64{1}); err != nil {
+			t.Fatalf("deleting user table: %v", err)
+		}
+
+		userDelete1, err := r.GetById(ctx, 1)
+		if err != nil {
+			t.Fatalf("creating user table: %v", err)
+		}
+
+		assert.Empty(t, userDelete1, "they should be equal")
+		assert.Nil(t, err)
+
+		if err := r.Delete(ctx, []int64{1}); err != nil {
+			t.Fatalf("deleting user table: %v", err)
+		}
+
+		userDelete2, err := r.GetById(ctx, 2)
+		if err != nil {
+			t.Fatalf("creating user table: %v", err)
+		}
+
+		assert.Empty(t, userDelete2, "they should be equal")
+		assert.Nil(t, err)
+	})
+
 }
 
 func TestUserMongoRepoUpdate(t *testing.T) {
