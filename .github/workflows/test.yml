@@ -17,27 +17,22 @@ jobs:
           go install github.com/ctrf-io/go-ctrf-json-reporter/cmd/go-ctrf-json-reporter@latest
        
       - name: Test
-        run: go test -cover -coverprofile=coverage.txt -json -run ^TestUser repos/repositories | go-ctrf-json-reporter -output ctrf-report.json
+        run: |
+          go test -json -run ^TestUser repos/repositories | go-ctrf-json-reporter -output ctrf-report.json
 
       - name: Publish CTRF Test Summary Results
         run: npx github-actions-ctrf ctrf-report.json
         if: always()
 
-      - name: Code Coverage Report
-        uses: irongut/CodeCoverageSummary@v1.3.0
-        with:
-          filename: coverage.txt
-          badge: true
-          fail_below_min: true
-          format: markdown
-          hide_branch_rate: false
-          hide_complexity: true
-          indicators: true
-          output: both
-          thresholds: '60 80'
-  
-      - name: Add Coverage PR Comment
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          recreate: true
-          path: code-coverage-results.md
+      - name: Coverage test
+        run: |
+          go test ./... -coverprofile coverage.out
+          COVERAGE=`go tool cover -func=coverage.out | grep total: | grep -Eo '[0-9]+\.[0-9]+'`
+          echo $COVERAGE
+          COLOR=orange
+          if (( $(echo "$COVERAGE <= 50" | bc -l) )) ; then
+              COLOR=red
+              elif (( $(echo "$COVERAGE > 80" | bc -l) )); then
+              COLOR=green
+          fi
+          curl "https://img.shields.io/badge/coverage-$COVERAGE%25-$COLOR" > badge.svg
