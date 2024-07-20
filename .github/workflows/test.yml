@@ -25,14 +25,13 @@ jobs:
         run: npx github-actions-ctrf ctrf-report.json
         if: always()
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v2
-        
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+      - name: Create Coverage Badges
+        uses: jaywcjlove/coverage-badges-cli@main
         with:
-          path: 'cover.html'
+          style: flat
+          source: ctrf-report.json
+          output: coverage/badges.svg
+          jsonPath: totals.percent_covered
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
+      - name: Print Badge
+        run: coverage/badges.svg 
