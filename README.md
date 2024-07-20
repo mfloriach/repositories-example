@@ -2,7 +2,7 @@
 
 [![test](https://github.com/mfloriach/repositories-example/actions/workflows/test.yml/badge.svg)](https://github.com/mfloriach/repositories-example/actions/workflows/test.yml)
 ![go](https://img.shields.io/badge/go-1.21-blue)
-[![Go Coverage](https://github.com/mfloriach/repositories-example/wiki/coverage.svg)](https://raw.githack.com/wiki/USER/REPO/coverage.html)
+[![Go Coverage](https://github.com/mfloriach/repositories-example/wiki/coverage.svg)](https://raw.githack.com/wiki/mfloriach/repositories-example/coverage.html)
 
 
 
