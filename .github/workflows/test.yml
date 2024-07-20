@@ -22,8 +22,3 @@ jobs:
       - name: Publish CTRF Test Summary Results
         run: npx github-actions-ctrf ctrf-report.json
         if: always()
-
-      - name: Publish
-        uses: fgrosse/go-coverage-report@v1.0.2 # Consider using a Git revision for maximum security
-        with:
-          coverage-file-name: "coverage.txt"
