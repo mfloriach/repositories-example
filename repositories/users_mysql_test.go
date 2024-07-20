@@ -225,6 +225,21 @@ func TestUserMysqlRepoGetAll(t *testing.T) {
 		assert.Equal(t, int64(4), total, "they should be equal")
 		assert.Nil(t, err, "they should be equal")
 	})
+
+	t.Run("by ids", func(t *testing.T) {
+		users, total, err := r.GetAll(ctx, interfaces.Filters{
+			IDs: []int64{3, 4},
+		})
+		if err != nil {
+			t.Fatalf("creating user table: %v", err)
+		}
+
+		assert.Equal(t, 2, len(users), "they should be equal")
+		assert.Equal(t, int64(2), total, "they should be equal")
+		assert.Equal(t, uint(3), users[0].ID, "they should be equal")
+		assert.Equal(t, uint(4), users[1].ID, "they should be equal")
+		assert.Nil(t, err, "they should be equal")
+	})
 }
 
 func TestUserMysqlRepoCreate(t *testing.T) {
@@ -276,31 +291,73 @@ func TestUserMysqlRepoDelete(t *testing.T) {
 
 	r := repositories.NewUserRepoMysql(db)
 
-	u := &interfaces.User{
-		Name: "John Doe",
-	}
+	t.Run("single", func(t *testing.T) {
+		u := &interfaces.User{
+			Name: "John Doe",
+		}
 
-	if err := r.Create(ctx, u); err != nil {
-		t.Fatalf("creating user table: %v", err)
-	}
+		if err := r.Create(ctx, u); err != nil {
+			t.Fatalf("creating user table: %v", err)
+		}
 
-	user, err := r.GetById(ctx, int64(u.ID))
-	if err != nil {
-		t.Fatalf("creating user table: %v", err)
-	}
+		user, err := r.GetById(ctx, int64(u.ID))
+		if err != nil {
+			t.Fatalf("get user: %v", err)
+		}
 
-	assert.Equal(t, uint(7), user.ID, "they should be equal")
+		assert.Equal(t, uint(7), user.ID, "they should be equal")
 
-	if err := r.Delete(ctx, int64(u.ID)); err != nil {
-		t.Fatalf("deleting user table: %v", err)
-	}
+		if err := r.Delete(ctx, []int64{int64(u.ID)}); err != nil {
+			t.Fatalf("deleting user table: %v", err)
+		}
 
-	userDelete, err := r.GetById(ctx, int64(u.ID))
-	if err != nil {
-		t.Fatalf("creating user table: %v", err)
-	}
+		userDelete, err := r.GetById(ctx, int64(u.ID))
+		if err != nil {
+			t.Fatalf("creating user table: %v", err)
+		}
 
-	assert.Empty(t, userDelete, "they should be equal")
+		assert.Empty(t, userDelete, "they should be equal")
+		assert.Nil(t, err)
+	})
+
+	t.Run("multiple", func(t *testing.T) {
+		u1 := &interfaces.User{
+			Name: "John Doe",
+		}
+
+		if err := r.Create(ctx, u1); err != nil {
+			t.Fatalf("creating user table: %v", err)
+		}
+
+		u2 := &interfaces.User{
+			Name: "John Doe",
+		}
+
+		if err := r.Create(ctx, u2); err != nil {
+			t.Fatalf("creating user table: %v", err)
+		}
+
+		if err := r.Delete(ctx, []int64{int64(u1.ID), int64(u2.ID)}); err != nil {
+			t.Fatalf("deleting user table: %v", err)
+		}
+
+		userDelete1, err := r.GetById(ctx, int64(u1.ID))
+		if err != nil {
+			t.Fatalf("creating user table: %v", err)
+		}
+
+		assert.Empty(t, userDelete1, "they should be equal")
+		assert.Nil(t, err)
+
+		userDelete2, err := r.GetById(ctx, int64(u1.ID))
+		if err != nil {
+			t.Fatalf("creating user table: %v", err)
+		}
+
+		assert.Empty(t, userDelete2, "they should be equal")
+		assert.Nil(t, err)
+	})
+
 }
 
 func TestUserMysqlRepoUpdate(t *testing.T) {

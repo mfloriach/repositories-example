@@ -360,7 +360,7 @@ func TestUserMongoRepoDelete(t *testing.T) {
 
 	r := repositories.NewUserRepoMongo(db)
 
-	if err := r.Delete(ctx, 1); err != nil {
+	if err := r.Delete(ctx, []int64{1}); err != nil {
 		t.Fatalf("deleting user table: %v", err)
 	}
 

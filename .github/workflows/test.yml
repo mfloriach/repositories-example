@@ -17,8 +17,13 @@ jobs:
           go install github.com/ctrf-io/go-ctrf-json-reporter/cmd/go-ctrf-json-reporter@latest
        
       - name: Test
-        run: go test -json -run ^TestUser repos/repositories | go-ctrf-json-reporter -output ctrf-report.json
+        run: go test -cover -coverprofile=coverage.txt -json -run ^TestUser repos/repositories | go-ctrf-json-reporter -output ctrf-report.json
 
       - name: Publish CTRF Test Summary Results
         run: npx github-actions-ctrf ctrf-report.json
         if: always()
+
+      - name: Publish
+        uses: fgrosse/go-coverage-report@v1.0.2 # Consider using a Git revision for maximum security
+        with:
+          coverage-file-name: "coverage.txt"

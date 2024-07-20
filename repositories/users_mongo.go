@@ -122,8 +122,8 @@ func (r userRepoMongo) Update(ctx context.Context, user *interfaces.User, vals m
 	return nil
 }
 
-func (r userRepoMongo) Delete(ctx context.Context, id int64, opts ...utils.Options) error {
-	_, err := r.collection.DeleteOne(ctx, bson.D{{"id", id}})
+func (r userRepoMongo) Delete(ctx context.Context, ids []int64, opts ...utils.Options) error {
+	_, err := r.collection.DeleteMany(ctx, bson.D{{"id", ids}})
 
 	return err
 }

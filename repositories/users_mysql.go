@@ -70,12 +70,21 @@ func (r userRepoMysql) GetAll(ctx context.Context, filters interfaces.Filters, o
 		stmp = stmp.Where("age <= ?", filters.AgeLte)
 	}
 
-	var total int64
+	var (
+		total = int64(len(filters.IDs))
+		err   error
+	)
+	if len(filters.IDs) > 0 {
+		err = stmp.Find(&users, filters.IDs).Error
+
+		return users, total, err
+	}
+
 	if err := stmp.Model(&interfaces.User{}).Count(&total).Error; err != nil {
 		return users, 0, err
 	}
 
-	err := stmp.
+	err = stmp.
 		Limit(limit).
 		Offset(offset).
 		Order(fmt.Sprintf("%v DESC", orderBy)).
@@ -93,6 +102,6 @@ func (r userRepoMysql) Update(ctx context.Context, user *interfaces.User, vals m
 	return utils.ConfigureDB(r.db, opts...).WithContext(ctx).Model(&user).Updates(vals).Error
 }
 
-func (r userRepoMysql) Delete(ctx context.Context, id int64, opts ...utils.Options) error {
-	return utils.ConfigureDB(r.db, opts...).WithContext(ctx).Delete(&interfaces.User{}, id).Error
+func (r userRepoMysql) Delete(ctx context.Context, ids []int64, opts ...utils.Options) error {
+	return utils.ConfigureDB(r.db, opts...).WithContext(ctx).Delete(&interfaces.User{}, ids).Error
 }
